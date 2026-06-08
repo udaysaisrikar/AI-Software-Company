@@ -61,7 +61,7 @@ async def run_session(
                 if event.is_final_response() and event.content and event.content.parts:
                     text = event.content.parts[0].text
                     if text and text!=None:
-                        final_response = text
+                        final_response+='\n\n'+text
     
     return final_response
 
