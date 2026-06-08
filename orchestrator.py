@@ -13,6 +13,6 @@ def create_company(retry_config):
 
     return SequentialAgent(
         name = 'flow',
-        sub_agents= [ceo, pm, uiux, techLead]
+        sub_agents= [ceo]
     )
 

@@ -1,31 +1,29 @@
-import os
 import asyncio
 from google.adk.runners import Runner
 from google.genai import types
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+from dotenv import load_dotenv
 
 from orchestrator import create_company
 from report_generator import generate_report
 from rich.console import Console
+from config import *
 
 console = Console()
-
-os.environ["GOOGLE_API_KEY"] = ""#secret
+load_dotenv()
 
 retry_config=types.HttpRetryOptions(
-    attempts=5,
-    exp_base=7,
-    initial_delay=1,
-    http_status_codes=[429, 500, 503, 504],
+    attempts=MAX_RETRIES,
+    exp_base=EXP_BASE,
+    initial_delay=INITIAL_DELAY,
+    http_status_codes=HTTP_STATUS_CODES,
 )
 
 company = create_company(retry_config)
-
 session_service = InMemorySessionService()
 
 runner = Runner(agent=company, app_name='default', session_service=session_service)
-
 
 #helper function
 async def run_session(
@@ -35,6 +33,7 @@ async def run_session(
 ):
     """Helper function to run queries in a session and display responses."""
     print(f"\nSession: {session_name}")
+    final_response = ""
 
     app_name = runner_instance.app_name
 
@@ -62,13 +61,28 @@ async def run_session(
                 if event.is_final_response() and event.content and event.content.parts:
                     text = event.content.parts[0].text
                     if text and text!=None:
-                        print(f"\nModel >>> {text}")
+                        final_response = text
+    
+    return final_response
 
 async def main():
 
     idea = input("Describe your idea:\n")
+    response = await run_session(runner, idea, 'session-1')
 
-    await run_session(runner, idea, 'session-1')
-
+    console.print(f"""
+[bold green]
+=================================
+DEVCOUNCIL PROJECT BLUEPRINT
+=================================
+[/bold green]
+{response}
+[bold green]
+=================================
+END OF REPORT
+=================================
+[/bold green]
+    """)
+    generate_report(response)
 
 asyncio.run(main())
