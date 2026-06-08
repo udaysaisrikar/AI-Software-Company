@@ -11,7 +11,7 @@ from rich.console import Console
 
 console = Console()
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyD20t-n0rW9zlT4aXLOsNb0s7usJg4mHQc"#secret
+os.environ["GOOGLE_API_KEY"] = ""#secret
 
 retry_config=types.HttpRetryOptions(
     attempts=5,
